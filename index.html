@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Resto Pesan Sendiri!</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+  <header>
+    <h1>🍔 Selamat Datang di Resttov</h1>
+    <p>Pilih menu favoritmu dan nikmati pesananmu 🎉</p>
+  </header>
+
+  <main>
+    <section class="menu-container">
+      <div class="kategori">
+        <button onclick="filterMenu('all')" class="active">Semua</button>
+        <button onclick="filterMenu('makanan')">Makanan</button>
+        <button onclick="filterMenu('minuman')">Minuman</button>
+        <button onclick="filterMenu('dessert')">Dessert</button>
+      </div>
+
+      <div class="menu-grid" id="menuGrid"></div>
+    </section>
+
+    <section class="order-container">
+      <h2>🧾 Pesanan Kamu</h2>
+      <ul id="orderList"></ul>
+      <h3>Total: Rp<span id="total">0</span></h3>
+
+      <div class="nama-section">
+        <h3>👤 Nama Pemesan</h3>
+        <input type="text" id="nama_Pemesan" placeholder="Masukkan nama kamu..." required>
+      </div>
+
+      <div class="delivery-section">
+        <h3>🚚 Pilih Opsi Pengantaran</h3>
+        <select id="opsiPengantaran" onchange="toggleAlamat()">
+          <option value="" disabled selected>Pilih opsi...</option>
+          <option value="Ambil Sendiri">Ambil Sendiri di Restoran</option>
+          <option value="Antar ke Rumah">Antar ke Rumah</option>
+        </select>
+
+        <div id="alamatSection" style="display:none; margin-top:8px;">
+          <input type="text" id="alamatPengantaran" placeholder="Masukkan alamat lengkap...">
+        </div>
+
+        <div style="margin-top:8px;">
+          <label for="waktuPesanan">🕒 Pilih Waktu Pesanan:</label><br>
+          <input type="datetime-local" id="waktuPesanan" required>
+        </div>
+      </div>
+
+      <div class="payment-section">
+        <h3>💳 Pilih Metode Pembayaran</h3>
+        
+        <div class="payment-options">
+          <div class="payment-card" onclick="selectPayment('Tunai', this)">
+            <div class="payment-icon">💵</div>
+            <div class="payment-info">
+              <h4>Tunai</h4>
+              <p>Bayar langsung dengan uang cash</p>
+            </div>
+          </div>
+
+          <div class="payment-card" onclick="selectPayment('Gopay', this)">
+            <div class="payment-icon">
+              <img src="logo/gopay-logo.png" class="logo-pembayaran" alt="Gopay" style="width:24px; height:24px;">
+            </div>
+            <div class="payment-info">
+              <h4>Gopay</h4>
+              <p>Transfer via aplikasi Gopay</p>
+            </div>
+          </div>
+
+          <div class="payment-card" onclick="selectPayment('OVO', this)">
+         <img src="logo/ovo-logo.png" class="logo-pembayaran" alt="Gopay" style="width:24px; height:24px;">
+            <div class="payment-info">
+              <h4>OVO</h4>
+              <p>Transfer via aplikasi OVO</p>
+            </div>
+          </div>
+
+          <div class="payment-card" onclick="selectPayment('DANA', this)">
+            <div class="payment-icon">
+            <img src="logo/dana-logo.png" class="logo-pembayaran" alt="Gopay" style="width:24px; height:24px;">
+            </div>
+            <div class="payment-info">
+              <h4>DANA</h4>
+              <p>Transfer via aplikasi DANA</p>
+            </div>
+          </div>
+
+          <div class="payment-card" onclick="selectPayment('Kartu Debit/Kredit', this)">
+            <div class="payment-icon">💳</div>
+            <div class="payment-info">
+              <h4>Kartu Debit/Kredit</h4>
+              <p>Bayar dengan kartu bank</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="uangBayarSection">
+          <label for="uangBayar" style="display:block; margin-bottom:8px; font-weight:600; color:#2d3748;">
+            💰 Masukkan Uang Tunai:
+          </label>
+          <input type="number" id="uangBayar" placeholder="Masukkan nominal pembayaran (Rp)">
+        </div>
+      </div>
+
+      <div class="bayar-section">
+        <div style="display:flex; gap:8px;">
+          <button id="pesanSekarang" onclick="bayar()" style="flex:1">Pesan Sekarang</button>
+          <button class="reset-btn" onclick="resetOrder()" style="flex:1">Batalkan Pesanan</button>
+        </div>
+        <p id="kembalian"></p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Popup Struk Digital -->
+  <div id="popupStruk" class="popup" aria-hidden="true">
+    <div class="popup-content">
+      <h2>🧾 Struk Digital</h2>
+      <div id="strukDetail"></div>
+      <div style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end;">
+        <button onclick="cetakStruk()">🖨️ Cetak</button>
+        <button onclick="tutupStruk()">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Suara -->
+  <audio id="successSound" src="success.mp3"></audio>
+  <audio id="klikSound" src="klik.mp3"></audio>
+  <audio id="resetSound" src="reset.mp3"></audio>
+
+  <!-- Modal QRIS -->
+  <div class="modal fade" id="qrisModal" tabindex="-1" aria-labelledby="qrisModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="qrisModalLabel">Pembayaran QRIS</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <p>Silakan scan QRIS di bawah untuk melakukan pembayaran</p>
+          <img id="qrisImage" src="qris-img.jpg" alt="QRIS" style="width:200px; border-radius:10px;">
+          
+          <div class="mt-3">
+            <p style="font-size: 14px; color:#555;">
+              Buka aplikasi e-wallet (Dana / Gopay / OVO / ShopeePay) lalu scan QR ini
+            </p>
+          </div>
+
+          <div class="bg-light p-2 rounded">
+            <strong>Total: Rp <span id="qrisTotal">0</span></strong>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button id="btnBayarSekarang" type="button" class="btn btn-primary">Bayar Sekarang</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- FIX: agar file app.js (module) bisa akses bootstrap.Modal -->
+  <script>
+    window.bootstrap = bootstrap;
+  </script>
+
+  <!-- App Module -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
